@@ -1,17 +1,18 @@
 #!/bin/sh
 
 LOGROTATE_LOGFILES="${LOGROTATE_LOGFILES:?Files for rotating must be given}"
-LOGROTATE_FILESIZE="${LOGROTATE_FILESIZE:-10M}"
-LOGROTATE_FILENUM="${LOGROTATE_FILENUM:-5}"
+LOGROTATE_FILENUM="${LOGROTATE_FILENUM:-7}"
 
 cat > /etc/logrotate.conf << EOF
 ${LOGROTATE_LOGFILES}
 {
-  size ${LOGROTATE_FILESIZE}
+  daily
+  rotate ${LOGROTATE_FILENUM}
   missingok
   notifempty
+  compress
+  delaycompress
   copytruncate
-  rotate ${LOGROTATE_FILENUM}
 }
 
 /var/log/cron
@@ -20,12 +21,14 @@ ${LOGROTATE_LOGFILES}
 /var/log/secure
 /var/log/spooler
 {
-    size 1G
-    missingok
-    sharedscripts
-    postrotate
-	      /bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true
-    endscript
+  daily
+  rotate 7
+  compress
+  missingok
+  sharedscripts
+  postrotate
+      /bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true
+  endscript
 }
 EOF
 
